@@ -32,7 +32,7 @@ PRINT_COSTS = {
     "extra_90": {
         "display_name": "Extra 90 cm (90cm Ancho x Alto Flexible)",
         "dimensions_cm": (90, 100),
-        "base_cost": 9000,
+        "base_cost": 8000,
         "full_cost": 23000,
     },
     "extra_100": {

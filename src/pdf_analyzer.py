@@ -777,7 +777,7 @@ class PDFAnalyzerTab(QWidget):
                             print_type_key = self.determine_print_type(width_cm_original, height_cm_original)
 
                         # --- LÓGICA: Si está en 0% - 9% siempre aplicar LINE_COSTS/detect_line_type ---
-                        if 0 <= non_white_percentage <= 9:
+                        if 0 <= non_white_percentage <= 9 and print_type_key in LINE_COSTS:
                             try:
                                 line_type = detect_line_type(pil_image)
                             except Exception as e:
@@ -785,24 +785,8 @@ class PDFAnalyzerTab(QWidget):
                                 self.log_message(f"Warning detect_line_type failed: {e}")
                                 line_type = "color"
 
-                            if print_type_key in LINE_COSTS:
-                                cost = LINE_COSTS[print_type_key].get(line_type, 0)
-                                tipo_texto = f"{PRINT_COSTS.get(print_type_key, {}).get('display_name', print_type_key)} línea {line_type}"
-                            else:
-                                # Fallback proporcional si el tipo no está en LINE_COSTS
-                                base_cost = PRINT_COSTS.get(print_type_key, {}).get("base_cost", 0)
-                                if base_cost <= 0:
-                                    cost = 0
-                                else:
-                                    if line_type == "color":
-                                        cost = int(round(base_cost))
-                                    else:
-                                        try:
-                                            factor = LINE_COSTS["pliego"]["negra"] / LINE_COSTS["pliego"]["color"]
-                                        except Exception:
-                                            factor = 0.857
-                                        cost = int(round(base_cost * factor))
-                                tipo_texto = f"{PRINT_COSTS.get(print_type_key, {}).get('display_name', print_type_key)} línea {line_type}"
+                            cost = LINE_COSTS[print_type_key].get(line_type, 0)
+                            tipo_texto = f"{PRINT_COSTS.get(print_type_key, {}).get('display_name', print_type_key)} línea {line_type}"
 
                             # Aplicar redondeos según tipo para mantener consistencia
                             if print_type_key == "cuarto_pliego":
@@ -899,8 +883,8 @@ class PDFAnalyzerTab(QWidget):
         def fits(dimensions, ref_width, ref_height):
             return (dimensions[0] <= ref_width and dimensions[1] <= ref_height)
 
-        short_side = min(width_cm, height_cm)
-        long_side = max(width_cm, height_cm)
+        short_side = round(min(width_cm, height_cm))
+        long_side = round(max(width_cm, height_cm))
 
         # Primero comprobar cuarto pliego (el más pequeño)
         cuarto_dims = PRINT_COSTS["cuarto_pliego"]["dimensions_cm"]
@@ -917,12 +901,11 @@ class PDFAnalyzerTab(QWidget):
             return "pliego"
 
         # Finalmente tamaños extra
-        if ((75 <= short_side <= 92)):
+        if 75 <= short_side <= 92:
             return "extra_90"
-        elif ((93 <= short_side <= 102)):
-            return "extra_100"
+        elif 93 <= short_side <= 105:
 
-        return "large_format"
+            return "large_format"
 
 
     def export_report(self):

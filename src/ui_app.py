@@ -582,7 +582,7 @@ class ImageCanvasApp(QWidget):
         histogram = gray_image.histogram()
         
         # Contar píxeles no blancos (0-254 en escala de grises, 255 es blanco)
-        non_white_pixels_count = sum(histogram[:254])
+        non_white_pixels_count = sum(histogram[:253])
         
         # Calcular área total del lienzo (en píxeles)
         total_canvas_area = self.canvas_width_px * self.canvas_height_px
@@ -599,8 +599,8 @@ class ImageCanvasApp(QWidget):
         def fits(dimensions, ref_width, ref_height):
             return (dimensions[0] <= ref_width and dimensions[1] <= ref_height)
 
-        short_side = min(width_cm, height_cm)
-        long_side = max(width_cm, height_cm)
+        short_side = round(min(width_cm, height_cm))
+        long_side = round(max(width_cm, height_cm))
 
         cuarto_dims = PRINT_COSTS["cuarto_pliego"]["dimensions_cm"]
         if fits((width_cm, height_cm), cuarto_dims[0], cuarto_dims[1]) or fits((height_cm, width_cm), cuarto_dims[0], cuarto_dims[1]):
@@ -615,7 +615,7 @@ class ImageCanvasApp(QWidget):
 
         if 75 <= short_side <= 92:
             return "extra_90"
-        elif 93 <= short_side <= 102:
+        elif 93 <= short_side <= 105:
             return "extra_100"
 
         return "large_format"
